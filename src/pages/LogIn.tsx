@@ -1,9 +1,13 @@
-import React from "react";
+import React, { useState } from "react";
 import Form from "../components/Form";
 import Input from "../components/Input";
-import { Box, Button, Typography } from "@mui/material";
+import { Alert, Box, Button, Snackbar, Typography } from "@mui/material";
 import InputPassword from "../components/InputPassword";
 import * as Yup from "yup";
+import { LoginUser } from "../mutations/LoginUser";
+import { useDispatch } from "react-redux";
+import { AppDispatch } from "../store/store";
+import { LoadingButton } from "@mui/lab";
 
 const validationSchema = Yup.object().shape({
   email: Yup.string()
@@ -18,11 +22,32 @@ const validationSchema = Yup.object().shape({
 });
 const initialValues = { email: "", password: "" };
 const LogIn = () => {
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+  console.log(process.env);
+
+  const dispatch = useDispatch<AppDispatch>();
+  const onSubmit = (values: any) => {
+    console.log(values);
+
+    dispatch(
+      LoginUser(values, {
+        onLoading(loading) {
+          setLoading(loading);
+        },
+        onError(message, error: any) {
+          console.log(message, error);
+
+          setError(error.response.data.message!);
+        },
+      })
+    );
+  };
   return (
     <Form
       initialValues={initialValues}
       validationSchema={validationSchema}
-      onSubmit={() => {}}
+      onSubmit={onSubmit}
     >
       <Box
         display="flex"
@@ -48,6 +73,15 @@ const LogIn = () => {
               Log In
             </Typography>
           </Box>
+          {error && (
+            <Alert
+              severity="error"
+              onClose={() => setError("")}
+              variant="outlined"
+            >
+              {error}
+            </Alert>
+          )}
           <Box
             display="flex"
             flexDirection="column"
@@ -57,9 +91,14 @@ const LogIn = () => {
           >
             <Input label="Email" name="email" />
             <InputPassword label="Password" name="password" />
-            <Button fullWidth type="submit" variant="contained">
+            <LoadingButton
+              loading={loading}
+              fullWidth
+              type="submit"
+              variant="contained"
+            >
               Log In
-            </Button>
+            </LoadingButton>
           </Box>
         </Box>
       </Box>
