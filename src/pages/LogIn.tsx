@@ -36,10 +36,9 @@ const LogIn = () => {
           setLoading(loading);
         },
         onError(message, error: any) {
-          console.log(message, error);
-
-          setError(error.response.data.message!);
+          setError(error?.response?.data?.message!);
         },
+        onSuccess(response) {},
       })
     );
   };
